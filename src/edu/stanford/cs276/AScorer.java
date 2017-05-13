@@ -117,6 +117,8 @@ public abstract class AScorer {
      * Initialize any variables needed
      */
     
+    //Isn't this going to be a problem if queries and idfs in general aren't lowercased?
+    //So when we build the idf, we have to lowercase it as well right?
     for (String queryWord : q.queryWords) {
       /*
        * Your code here
@@ -125,10 +127,76 @@ public abstract class AScorer {
        * i.e. for each of the different fields.
        * Don't forget to lowercase the query word.
        */
+    	
+    	// Is this sufficient?
+    	queryWord = queryWord.toLowerCase();
+    	
+    	String[] types = {"url","title","body","header","anchor"};
+    	
+    	for (String type : types) {
+    		Map<String, Double> type_map = new HashMap<String, Double>();
+    		
+    		if (type.equals("url") && d.url != null) {
+    			type_map.put(queryWord, (double)num_occurances_url(d.url, queryWord));
+    		} else if (type.equals("title") && d.title != null) {
+    			type_map.put(queryWord, (double)num_occurances(d.title, queryWord));
+    		} else if (type.equals("body") && d.body_hits != null) {
+				if (d.body_hits.containsKey(queryWord))
+					type_map.put(queryWord, (double) d.body_hits.get(queryWord).size());
+    		} else if (type.equalsIgnoreCase("header") && d.headers != null) {
+    			int count = 0;
+    			
+    			for(String header : d.headers)
+    				count += num_occurances(header, queryWord);    
+    			
+    			type_map.put(queryWord, (double)count);
+    		} else if (type.equals("anchor") && d.anchors != null) {
+    			int count = 0;
+    			
+    			for(String anchor : d.anchors.keySet())
+    				count += num_occurances(anchor, queryWord) * d.anchors.get(anchor);
+    			
+				type_map.put(queryWord, (double)count);
+    		}
+    		
+    		tfs.put(type, type_map);
+    	}
+    	   	
     }
+    
     return tfs;
   }
 
+  //how many times does shortStr occur in longStr
+  private int num_occurances(String longStr, String shortStr) {
+	  longStr = longStr.toLowerCase();
+	  
+	  String[] words = longStr.split(" ");
+	  int count = 0;
+	  
+	  for(String word : words) {
+		  if (word.equals(shortStr)) {
+			  count++;
+		  }
+	  }
+	  
+	  return count;
+  }
+  
+  private int num_occurances_url(String url, String shortStr) {
+	  url = url.toLowerCase();
+	  String[] words = url.split("[^A-Za-z0-9 ]");
+	  int count = 0;
+	  
+	  for(String word : words) {
+		  if (word.equals(shortStr)) {
+			  count++;
+		  }
+	  }
+	  
+	  return count;	  
+  }
+  
   //gets rid of all non alphanumeric and makes all white space a single " " and trims off leading/ending whitespace
   public String clean(String str) {
 	  return str.toLowerCase().replaceAll("[^A-Za-z0-9 ]", "").replace("\\s+", " ").trim();
