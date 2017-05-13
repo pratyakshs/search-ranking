@@ -60,6 +60,14 @@ public abstract class AScorer {
      * how many documents contain the query terms which is stored
      * in this.idfs).
      */
+
+    for(String word: q.queryWords) {
+		if(tfQuery.containsKey(word)) {
+			tfQuery.put(word, tfQuery.get(word) + 1.0);
+		} else {
+			tfQuery.put(word, 1.0);
+		}
+    }
     
     return tfQuery;
   }
