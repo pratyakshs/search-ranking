@@ -47,6 +47,9 @@ public abstract class AScorer {
    * Get frequencies for a query.
    * @param q the query to compute frequencies for
    */
+  
+  //Using raw frequencies for now, can change to sublinear later is necessary
+  
   public Map<String,Double> getQueryFreqs(Query q) {
 
     // queryWord -> term frequency
@@ -61,12 +64,25 @@ public abstract class AScorer {
      * in this.idfs).
      */
 
-    for(String word: q.queryWords) {
+    for(String word : q.queryWords) {
+    	//word = clean(word);
+    	
 		if(tfQuery.containsKey(word)) {
 			tfQuery.put(word, tfQuery.get(word) + 1.0);
 		} else {
 			tfQuery.put(word, 1.0);
 		}
+    }
+    
+    for(String word : tfQuery.keySet()) {
+    	double idf_weight = 0.0;
+    	
+    	if (this.idfs.containsKey(word))
+    		idf_weight = this.idfs.get(word);
+    	else
+    		idf_weight = Math.log(1 + this.idfs.get(LoadHandler.no_word_in_doc_idf_val));
+    	
+    	tfQuery.put(word, tfQuery.get(word) * idf_weight);
     }
     
     return tfQuery;
@@ -113,4 +129,8 @@ public abstract class AScorer {
     return tfs;
   }
 
+  //gets rid of all non alphanumeric and makes all white space a single " " and trims off leading/ending whitespace
+  public String clean(String str) {
+	  return str.toLowerCase().replaceAll("[^A-Za-z0-9 ]", "").replace("\\s+", " ").trim();
+  }
 }

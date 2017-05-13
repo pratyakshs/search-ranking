@@ -27,6 +27,10 @@ public class LoadHandler {
    * @param feature_file_name the name of the feature file.
    * @return the mapping of Query-url-Document
    */
+	
+	
+  public static String no_word_in_doc_idf_val = "AbsolutelyRandomStringDanielHsu1219051035015";
+	
   public static Map<Query,Map<String, Document>> loadTrainData(String feature_file_name) throws Exception {
     File feature_file = new File(feature_file_name);
     if (!feature_file.exists() ) {
@@ -160,6 +164,9 @@ public class LoadHandler {
        * Laplace add-one smoothing.
        */
     }
+    
+    //Use this key in case term does not appear in collection corpus
+	termDocCount.put(no_word_in_doc_idf_val, Math.log(totalDocCount + 1));
     
     // Save to file
     try {

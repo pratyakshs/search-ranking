@@ -101,7 +101,6 @@ public class CosineSimilarityScorer extends AScorer {
         double tf = tfs.get(type).get(term);
 
         if(tf > 0) {
-          //use natural log right?
           tfs.get(type).put(term, (1.0 + Math.log(tf)) / (smoothingBodyLength + d.body_length));
         } else {
           //actually this isn't necessary, don't think you can have negative
