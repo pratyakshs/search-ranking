@@ -32,7 +32,9 @@ public class CosineSimilarityScorer extends AScorer {
   double bodyweight = 0.1;
   double headerweight = 0.1;
   double anchorweight = 0.1;
-  double smoothingBodyLength = 1.0; 
+  double smoothingBodyLength = 500.0; 
+
+  HashMap<String, Double> weights = new HashMap<String, Double>();
   
   /**
    * Construct a Cosine Similarity Scorer.
@@ -40,6 +42,12 @@ public class CosineSimilarityScorer extends AScorer {
    */
   public CosineSimilarityScorer(Map<String,Double> idfs) {
     super(idfs);
+
+    weights.put("url", urlweight);
+    weights.put("title", titleweight);
+    weights.put("body", bodyweight);
+    weights.put("header", headerweight);
+    weights.put("anchor", anchorweight);
   }
 
   /**
@@ -59,7 +67,20 @@ public class CosineSimilarityScorer extends AScorer {
      * between a query vector and the term score vectors
      * for a document.
      */
+
+    for(String type : tfs.keySet()) {
+      score += weights.get(type) * dotProduct(tfs.get(type), tfQuery);
+    }
+
     return score;
+  }
+
+  //every term inside doc keyset should also be inside query		  
+  private double dotProduct(Map<String, Double> doc, Map<String, Double> query) {	  
+	  double ret = 0.0;
+	  for(String term : doc.keySet())
+		  ret += doc.get(term) * query.get(term);
+	  return ret;
   }
   
   /**
