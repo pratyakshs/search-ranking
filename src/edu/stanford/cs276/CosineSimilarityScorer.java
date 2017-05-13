@@ -75,7 +75,19 @@ public class CosineSimilarityScorer extends AScorer {
      * fields as discussed in the assignment handout.
      */
 
-    asdfasdf
+    for(String type : tfs.keySet()) {
+      for(String term : tfs.get(type).keySet()) {
+        int tf = tfs.get(type).get(term);
+
+        if(tf > 0) {
+          //use natural log right?
+          tf.get(type).put(term, (1.0 + Math.log(tf)) / (smoothingBodyLength + d.body_length));
+        } else {
+          //actually this isn't necessary, don't think you can have negative
+          tfs.get(type).put(term, 0);
+        }
+      }
+    }
   }
   
   /**
