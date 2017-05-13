@@ -2,6 +2,7 @@ package edu.stanford.cs276;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -129,7 +130,7 @@ public class LoadHandler {
    * @param idfFile the file containing the idfs.
    * @return the term-doc counts
    */
-  public static Map<String,Double> buildDFs(String dataDir, String idfFile) {
+  public static Map<String,Double> buildDFs(String dataDir, String idfFile) throws IOException {
     // Get root directory
     String root = dataDir;
     File rootdir = new File(root);
@@ -154,6 +155,45 @@ public class LoadHandler {
      * Hint: consult PA1 for how to load each file in each block
      */
     
+    /* A filter to get rid of all files starting with .*/
+    FileFilter filter = new FileFilter() {
+        @Override
+        public boolean accept(File pathname) {
+            String name = pathname.getName();
+            return !name.startsWith(".");
+        }
+    };
+    
+    for(File block : dirlist) {
+        File blockDir = new File(root, block.getName());
+        File[] filelist = blockDir.listFiles(filter);
+        
+        for (File file : filelist) {
+        	totalDocCount++;
+        	
+        	HashSet<String> terms_in_doc = new HashSet<String>();
+        	
+        	BufferedReader reader = new BufferedReader(new FileReader(file));
+            String line;
+            
+            while ((line = reader.readLine()) != null) {
+                String[] tokens = line.trim().split("\\s+");
+                
+                for (String token : tokens)
+                	terms_in_doc.add(token);
+            }
+            
+            for(String token : terms_in_doc) {
+            	if(termDocCount.containsKey(token))
+            		termDocCount.put(token, termDocCount.get(token) + 1);
+            	else
+            		termDocCount.put(token, 1.0);
+            }
+            
+            reader.close();
+        }
+    }
+    
     // Compute inverse document frequencies using document frequencies
     for (String term : termDocCount.keySet()) {
       /*
@@ -163,6 +203,8 @@ public class LoadHandler {
        * Thus to guard against such a case, we will apply 
        * Laplace add-one smoothing.
        */
+    	
+    	termDocCount.put(term, Math.log((totalDocCount + 1) / (termDocCount.get(term) + 1)));
     }
     
     //Use this key in case term does not appear in collection corpus
