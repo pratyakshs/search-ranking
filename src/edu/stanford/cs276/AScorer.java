@@ -48,7 +48,7 @@ public abstract class AScorer {
    * @param q the query to compute frequencies for
    */
   
-  //Using raw frequencies for now, can change to sublinear later is necessary
+  //Doing sublinear scaling for freq
   
   public Map<String,Double> getQueryFreqs(Query q) {
 
@@ -82,7 +82,7 @@ public abstract class AScorer {
     	else
     		idf_weight = Math.log(1 + this.idfs.get(LoadHandler.no_word_in_doc_idf_val));
     	
-    	tfQuery.put(word, tfQuery.get(word) * idf_weight);
+    	tfQuery.put(word, (1 + Math.log(tfQuery.get(word))) * idf_weight);
     }
     
     return tfQuery;
