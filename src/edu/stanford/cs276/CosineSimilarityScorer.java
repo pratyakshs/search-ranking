@@ -69,11 +69,13 @@ public class CosineSimilarityScorer extends AScorer {
    * @param q the Query
    */
   public void normalizeTFs(Map<String,Map<String, Double>> tfs,Document d, Query q) {
-  /*
+    /*
      * TODO : Your code here
      * Note that we should give uniform normalization to all 
      * fields as discussed in the assignment handout.
      */
+
+    asdfasdf
   }
   
   /**
