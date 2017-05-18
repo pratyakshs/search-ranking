@@ -68,11 +68,12 @@ public class SmallestWindowScorer extends BM25Scorer {
   }
 
   private int findSmallestWindowURL(String url, Query q) {
-	return -1;
+	  url = url.toLowerCase();
+	  return findSmallestWindowString(url.split("[^A-Za-z0-9 ]"), q);
   }
   
   private int findSmallestWindowTitle(String title, Query q) {
-    return -1;
+	return findSmallestWindowString(title.split(" "), q);
   }
   
   private int findSmallestWindowBody(Map<String, List<Integer>> body, Query q) {
@@ -80,11 +81,31 @@ public class SmallestWindowScorer extends BM25Scorer {
   }
   
   private int findSmallestWindowHeaders(List<String> headers, Query q) {
-	return -1;
+	int smallest = Integer.MAX_VALUE;
+	
+	for(String str : headers) {
+		int small = findSmallestWindowString(str.split(" "), q);
+		if (small < smallest)
+			smallest = small;
+	}	  
+	  
+	return smallest;
   }
   
   private int findSmallestWindowAnchors(Map<String, Integer> anchors, Query q) {
-	return -1;
+	int smallest = Integer.MAX_VALUE;
+	
+	for(String str : anchors.keySet()) {
+		int small = findSmallestWindowString(str.split(" "), q);
+		if (small < smallest)
+			smallest = small;
+	}	  
+	  
+	return smallest;
+  }
+  
+  private int findSmallestWindowString(String[] words, Query q) {
+	  return -1;
   }
   
   /**
