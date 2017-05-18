@@ -46,19 +46,19 @@ public class SmallestWindowScorer extends BM25Scorer {
 			if (newSmallestWindow < smallestWindow)
 				smallestWindow = newSmallestWindow;
 		} else if (type.equals("title") && d.title != null) {
-			int newSmallestWindow = findSmallestWindowTitle(d.url, q);
+			int newSmallestWindow = findSmallestWindowTitle(d.title, q);
 			if (newSmallestWindow < smallestWindow)
 				smallestWindow = newSmallestWindow;
 		} else if (type.equals("body") && d.body_hits != null) {
-			int newSmallestWindow = findSmallestWindowBody(d.url, q);
+			int newSmallestWindow = findSmallestWindowBody(d.body_hits, q);
 			if (newSmallestWindow < smallestWindow)
 				smallestWindow = newSmallestWindow;
 		} else if (type.equalsIgnoreCase("header") && d.headers != null) {
-			int newSmallestWindow = findSmallestWindowHeaders(d.url, q);
+			int newSmallestWindow = findSmallestWindowHeaders(d.headers, q);
 			if (newSmallestWindow < smallestWindow)
 				smallestWindow = newSmallestWindow;
 		} else if (type.equals("anchor") && d.anchors != null) {
-			int newSmallestWindow = findSmallestWindowAnchor(d.url, q);
+			int newSmallestWindow = findSmallestWindowAnchors(d.anchors, q);
 			if (newSmallestWindow < smallestWindow)
 				smallestWindow = newSmallestWindow;
 		}
@@ -71,21 +71,19 @@ public class SmallestWindowScorer extends BM25Scorer {
 	return -1;
   }
   
-  private int findSmallestWindowTitle(String url, Query q) {
-//	  String[] words = longStr.split(" ");
-	  
-	  return -1;
+  private int findSmallestWindowTitle(String title, Query q) {
+    return -1;
   }
   
-  private int findSmallestWindowBody(String url, Query q) {
+  private int findSmallestWindowBody(Map<String, List<Integer>> body, Query q) {
 	return -1;
   }
   
-  private int findSmallestWindowHeaders(String url, Query q) {
+  private int findSmallestWindowHeaders(List<String> headers, Query q) {
 	return -1;
   }
   
-  private int findSmallestWindowAnchor(String url, Query q) {
+  private int findSmallestWindowAnchors(Map<String, Integer> anchors, Query q) {
 	return -1;
   }
   
