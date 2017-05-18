@@ -75,7 +75,7 @@ public class SmallestWindowScorer extends CosineSimilarityScorer/*BM25Scorer*/ {
 	
 	windowSize = smallestWindow;
 	
-    return smallestWindow;
+    return Math.abs(smallestWindow - q_terms.size()); //return difference between window size |Q|
   }
 
   private int findSmallestWindowURL(String url, Query q) throws UnsupportedEncodingException {
@@ -236,10 +236,16 @@ public class SmallestWindowScorer extends CosineSimilarityScorer/*BM25Scorer*/ {
      *
      */
     
-    //e^-x
-    boostScore = (B - 1) * Math.exp(q_terms.size()) * Math.exp(-smallestWindow) + 1;
+    //e^-x - with window difference
+    boostScore = 1 + B * Math.exp(-smallestWindow);
     
-    // 1/x
+    //1/x - with window difference
+    //boostScore = 1 + (double)(B - 1) / (double)(x + 1);
+    
+    //e^-x - with absolute window size
+    //boostScore = (B - 1) * Math.exp(q_terms.size()) * Math.exp(-smallestWindow) + 1;
+    
+    // 1/x - with absolue window size
     //boostScore = 1 + (double)(B - 1) / (double)(smallestWindow - q_terms.size() + 1);
     return boostScore;
   }
