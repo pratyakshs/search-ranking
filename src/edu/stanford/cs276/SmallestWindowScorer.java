@@ -2,6 +2,7 @@ package edu.stanford.cs276;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,8 @@ import java.util.Map;
  */
 public class SmallestWindowScorer extends BM25Scorer {
   
+  HashSet<String> q_unique_terms = new HashSet<String>();
+	
   public SmallestWindowScorer(Map<String, Double> idfs, Map<Query,Map<String, Document>> queryDict) {
     super(idfs, queryDict);
   }
@@ -37,12 +40,13 @@ public class SmallestWindowScorer extends BM25Scorer {
    */  
   private double getBoostScore (Document d, Query q) {
     int smallestWindow = getWindow(d, q);
-    double boostScore = 0;
+    double B = 5;
     /*
      * @//TODO : Your code here, calculate the boost score.
      *
      */
-    return boostScore;
+    
+    return 1 + (double)(B - 1) / (double)(smallestWindow - q_unique_terms.size() + 1);
   }
   
   @Override
