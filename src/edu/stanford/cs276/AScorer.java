@@ -184,7 +184,7 @@ public abstract class AScorer {
 	  return count;
   }
 
-  private String[] urlSplit(String url) throws UnsupportedEncodingException {
+  protected String[] urlSplit(String url) throws UnsupportedEncodingException {
       String decoded = URLDecoder.decode(url, "UTF-8");
       return decoded.split("[^A-Za-z0-9]+");
   }
