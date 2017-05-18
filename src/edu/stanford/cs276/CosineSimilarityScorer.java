@@ -19,10 +19,10 @@ public class CosineSimilarityScorer extends AScorer {
    * the weights for each field.
    */
   double urlweight = 0.1;
-  double titleweight  = 0.1;
-  double bodyweight = 0.1;
-  double headerweight = 0.1;
-  double anchorweight = 0.1;
+  double titleweight  = 0.3;
+  double bodyweight = 0.2;
+  double headerweight = 0.3;
+  double anchorweight = 0.2;
   double smoothingBodyLength = 500.0;
 
   HashMap<String, Double> weights = new HashMap<String, Double>();

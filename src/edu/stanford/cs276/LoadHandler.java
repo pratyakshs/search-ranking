@@ -23,29 +23,29 @@ import java.util.Set;
  * 2) build idf from data collections in PA1.
  */
 public class LoadHandler {
-  /** 
+  /**
    * Loads the training data.
    * @param feature_file_name the name of the feature file.
    * @return the mapping of Query-url-Document
    */
-	
-	
+
+
   public static String no_word_in_doc_idf_val = "AbsolutelyRandomStringDanielHsu1219051035015";
-	
+
   public static Map<Query,Map<String, Document>> loadTrainData(String feature_file_name) throws Exception {
     File feature_file = new File(feature_file_name);
     if (!feature_file.exists() ) {
       System.err.println("Invalid feature file name: " + feature_file_name);
       return null;
     }
-    
+
     BufferedReader reader = new BufferedReader(new FileReader(feature_file));
     String line = null, url= null, anchor_text = null;
     Query query = null;
-    
+
     /* Feature dictionary: Query -> (url -> Document)  */
     Map<Query,Map<String, Document>> queryDict =  new HashMap<Query,Map<String, Document>>();
-    
+
     while ((line = reader.readLine()) != null) {
       String[] tokens = line.split(":", 2);
       String key = tokens[0].trim();
@@ -54,11 +54,11 @@ public class LoadHandler {
       if (key.equals("query")) {
         query = new Query(value);
         queryDict.put(query, new HashMap<String, Document>());
-      } 
+      }
       else if (key.equals("url")) {
         url = value;
         queryDict.get(query).put(url, new Document(url));
-      } 
+      }
       else if (key.equals("title")) {
         queryDict.get(query).get(url).title = new String(value);
       }
@@ -73,18 +73,18 @@ public class LoadHandler {
         String[] temp = value.split(" ", 2);
         String term = temp[0].trim();
         List<Integer> positions_int;
-        
+
         if (!queryDict.get(query).get(url).body_hits.containsKey(term)) {
           positions_int = new ArrayList<Integer>();
           queryDict.get(query).get(url).body_hits.put(term, positions_int);
         } else
           positions_int = queryDict.get(query).get(url).body_hits.get(term);
-        
+
         String[] positions = temp[1].trim().split(" ");
         for (String position : positions)
           positions_int.add(Integer.parseInt(position));
-        
-      } 
+
+      }
       else if (key.equals("body_length"))
         queryDict.get(query).get(url).body_length = Integer.parseInt(value);
       else if (key.equals("pagerank"))
@@ -95,15 +95,15 @@ public class LoadHandler {
           queryDict.get(query).get(url).anchors = new HashMap<String, Integer>();
       }
       else if (key.equals("stanford_anchor_count"))
-        queryDict.get(query).get(url).anchors.put(anchor_text, Integer.parseInt(value));      
+        queryDict.get(query).get(url).anchors.put(anchor_text, Integer.parseInt(value));
     }
 
     reader.close();
-    
+
     return queryDict;
   }
-  
-  /** 
+
+  /**
    * Unserializes the term-doc counts from file.
    * @param idfFile the file containing the idfs.
    * @return the mapping of term-doc counts.
@@ -123,7 +123,7 @@ public class LoadHandler {
     }
     return termDocCount;
   }
-  
+
   /**
    * Builds document frequencies and then serializes to file.
    * @param dataDir the data directory
@@ -146,7 +146,7 @@ public class LoadHandler {
 
     // Count number of documents in which each term appears
     Map<String,Double> termDocCount = new HashMap<String, Double>();
-    
+
     /*
      * TODO: Your code here.
      * For each file in each block, accumulate counts for:
@@ -154,7 +154,7 @@ public class LoadHandler {
      * 2) Total number of documents containing each term
      * Hint: consult PA1 for how to load each file in each block
      */
-    
+
     /* A filter to get rid of all files starting with .*/
     FileFilter filter = new FileFilter() {
         @Override
@@ -163,53 +163,54 @@ public class LoadHandler {
             return !name.startsWith(".");
         }
     };
-    
+
     for(File block : dirlist) {
         File blockDir = new File(root, block.getName());
         File[] filelist = blockDir.listFiles(filter);
-        
+
         for (File file : filelist) {
         	totalDocCount++;
-        	
+
         	HashSet<String> terms_in_doc = new HashSet<String>();
-        	
+
         	BufferedReader reader = new BufferedReader(new FileReader(file));
             String line;
-            
+
             while ((line = reader.readLine()) != null) {
+                line = line.toLowerCase();
                 String[] tokens = line.trim().split("\\s+");
-                
+
                 for (String token : tokens)
                 	terms_in_doc.add(token);
             }
-            
+
             for(String token : terms_in_doc) {
             	if(termDocCount.containsKey(token))
             		termDocCount.put(token, termDocCount.get(token) + 1);
             	else
             		termDocCount.put(token, 1.0);
             }
-            
+
             reader.close();
         }
     }
-    
+
     // Compute inverse document frequencies using document frequencies
     for (String term : termDocCount.keySet()) {
       /*
        * TODO : Your code here
-       * Remember that it's possible for a term to not appear 
+       * Remember that it's possible for a term to not appear
        * in the collection corpus.
-       * Thus to guard against such a case, we will apply 
+       * Thus to guard against such a case, we will apply
        * Laplace add-one smoothing.
        */
-    	
+
     	termDocCount.put(term, Math.log((totalDocCount + 1) / (termDocCount.get(term) + 1)));
     }
-    
+
     //Use this key in case term does not appear in collection corpus
 	termDocCount.put(no_word_in_doc_idf_val, Math.log(totalDocCount + 1));
-    
+
     // Save to file
     try {
       FileOutputStream fos = new FileOutputStream(idfFile);

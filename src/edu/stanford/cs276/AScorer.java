@@ -120,7 +120,9 @@ public abstract class AScorer {
 
     //Isn't this going to be a problem if queries and idfs in general aren't lowercased?
     //So when we build the idf, we have to lowercase it as well right?
-    for (String queryWord : q.queryWords) {
+    String[] types = {"url","title","body","header","anchor"};
+    for (String type : types) {
+
       /*
        * Your code here
        * Loop through query terms and accumulate term frequencies.
@@ -129,21 +131,23 @@ public abstract class AScorer {
        * Don't forget to lowercase the query word.
        */
 
-    	// Is this sufficient?
-    	queryWord = queryWord.toLowerCase();
 
-    	String[] types = {"url","title","body","header","anchor"};
+        // for this specific type
+        Map<String, Double> type_map = new HashMap<String, Double>();
 
-    	for (String type : types) {
-    		Map<String, Double> type_map = new HashMap<String, Double>();
+    	for (String queryWord : q.queryWords) {
+    	    queryWord = queryWord.toLowerCase();
 
     		if (type.equals("url") && d.url != null) {
     			type_map.put(queryWord, (double)num_occurances_url(d.url, queryWord));
     		} else if (type.equals("title") && d.title != null) {
     			type_map.put(queryWord, (double)num_occurances(d.title, queryWord));
     		} else if (type.equals("body") && d.body_hits != null) {
-				if (d.body_hits.containsKey(queryWord))
+				if (d.body_hits.containsKey(queryWord)) {
 					type_map.put(queryWord, (double) d.body_hits.get(queryWord).size());
+				} else {
+				    type_map.put(queryWord, 0.);
+				}
     		} else if (type.equalsIgnoreCase("header") && d.headers != null) {
     			int count = 0;
 
@@ -159,10 +163,8 @@ public abstract class AScorer {
 
 				type_map.put(queryWord, (double)count);
     		}
-
-    		tfs.put(type, type_map);
     	}
-
+    	tfs.put(type, type_map);
     }
 
     return tfs;
@@ -172,7 +174,7 @@ public abstract class AScorer {
   private int num_occurances(String longStr, String shortStr) {
 	  longStr = longStr.toLowerCase();
 
-	  String[] words = longStr.split(" ");
+	  String[] words = longStr.split("\\s+");
 	  int count = 0;
 
 	  for(String word : words) {
@@ -186,6 +188,7 @@ public abstract class AScorer {
 
   protected String[] urlSplit(String url) throws UnsupportedEncodingException {
       String decoded = URLDecoder.decode(url, "UTF-8");
+
       return decoded.split("[^A-Za-z0-9]+");
   }
 
@@ -203,7 +206,7 @@ public abstract class AScorer {
   }
 
   //gets rid of all non alphanumeric and makes all white space a single " " and trims off leading/ending whitespace
-  public String clean(String str) {
-	  return str.toLowerCase().replaceAll("[^A-Za-z0-9 ]", "").replace("\\s+", " ").trim();
-  }
+//  public String clean(String str) {
+//	  return str.toLowerCase().replaceAll("[^A-Za-z0-9 ]", "").replace("\\s+", " ").trim();
+//  }
 }
