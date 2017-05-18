@@ -30,7 +30,7 @@ public class SmallestWindowScorer extends BM25Scorer {
    * @param d: document
    * @param q: query
    */  
-  private int getWindow(Document d, Query q) {
+  private int getWindow(Document d, Query q) throws UnsupportedEncodingException {
     /*
      * @//TODO : Your code here
      */
@@ -72,9 +72,9 @@ public class SmallestWindowScorer extends BM25Scorer {
     return smallestWindow;
   }
 
-  private int findSmallestWindowURL(String url, Query q) {
+  private int findSmallestWindowURL(String url, Query q) throws UnsupportedEncodingException {
 	  url = url.toLowerCase();
-	  return findSmallestWindowString(url.split("[^A-Za-z0-9 ]"), q);
+	  return findSmallestWindowString(urlSplit(url), q);
   }
   
   private int findSmallestWindowTitle(String title, Query q) {
@@ -223,7 +223,7 @@ public class SmallestWindowScorer extends BM25Scorer {
    * @param d: document
    * @param q: query
    */  
-  private double getBoostScore (Document d, Query q) {
+  private double getBoostScore (Document d, Query q) throws UnsupportedEncodingException {
     int smallestWindow = getWindow(d, q);
     double B = 5;
     /*
