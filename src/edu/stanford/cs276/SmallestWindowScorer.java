@@ -20,7 +20,9 @@ import edu.stanford.cs276.util.Pair;
 public class SmallestWindowScorer extends CosineSimilarityScorer/*BM25Scorer*/ {
   
   HashSet<String> q_terms = new HashSet<String>();
-  double B = 5;
+  double B = 15;
+  int windowSize = -1;
+  double boostScore = -1;
   
   public SmallestWindowScorer(Map<String, Double> idfs, Map<Query,Map<String, Document>> queryDict) {
     //super(idfs, queryDict);
@@ -70,6 +72,8 @@ public class SmallestWindowScorer extends CosineSimilarityScorer/*BM25Scorer*/ {
 				smallestWindow = newSmallestWindow;
 		}
 	}
+	
+	windowSize = smallestWindow;
 	
     return smallestWindow;
   }
@@ -232,7 +236,21 @@ public class SmallestWindowScorer extends CosineSimilarityScorer/*BM25Scorer*/ {
      *
      */
     
-    return 1 + (double)(B - 1) / (double)(smallestWindow - q_terms.size() + 1);
+    //e^-x
+    boostScore = (B - 1) * Math.exp(q_terms.size()) * Math.exp(-smallestWindow) + 1;
+    
+    // 1/x
+    //boostScore = 1 + (double)(B - 1) / (double)(smallestWindow - q_terms.size() + 1);
+    return boostScore;
+  }
+  
+  @Override
+  public String getDebugStr(Document d, Query q)
+  {
+    String b = "boost score: " + Double.toString(boostScore);
+	String w = "window size: " + Integer.toString(windowSize);
+	return w + "\n" + b;
+    //return "window size: " + Integer.toString(d.page_rank);
   }
   
   @Override
