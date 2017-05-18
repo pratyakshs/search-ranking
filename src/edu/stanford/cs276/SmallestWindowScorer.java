@@ -29,9 +29,65 @@ public class SmallestWindowScorer extends BM25Scorer {
     /*
      * @//TODO : Your code here
      */
-    return -1;
+	  
+	q_unique_terms.clear();
+	
+	for(String s : q.queryWords)
+		q_unique_terms.add(s);
+
+	int smallestWindow = Integer.MAX_VALUE;
+	
+	String[] types = {"url","title","body","header","anchor"};
+	
+	for (String type : types) {
+		
+		if (type.equals("url") && d.url != null) {
+			int newSmallestWindow = findSmallestWindowURL(d.url, q);
+			if (newSmallestWindow < smallestWindow)
+				smallestWindow = newSmallestWindow;
+		} else if (type.equals("title") && d.title != null) {
+			int newSmallestWindow = findSmallestWindowTitle(d.url, q);
+			if (newSmallestWindow < smallestWindow)
+				smallestWindow = newSmallestWindow;
+		} else if (type.equals("body") && d.body_hits != null) {
+			int newSmallestWindow = findSmallestWindowBody(d.url, q);
+			if (newSmallestWindow < smallestWindow)
+				smallestWindow = newSmallestWindow;
+		} else if (type.equalsIgnoreCase("header") && d.headers != null) {
+			int newSmallestWindow = findSmallestWindowHeaders(d.url, q);
+			if (newSmallestWindow < smallestWindow)
+				smallestWindow = newSmallestWindow;
+		} else if (type.equals("anchor") && d.anchors != null) {
+			int newSmallestWindow = findSmallestWindowAnchor(d.url, q);
+			if (newSmallestWindow < smallestWindow)
+				smallestWindow = newSmallestWindow;
+		}
+	}
+	
+    return smallestWindow;
   }
 
+  private int findSmallestWindowURL(String url, Query q) {
+	return -1;
+  }
+  
+  private int findSmallestWindowTitle(String url, Query q) {
+//	  String[] words = longStr.split(" ");
+	  
+	  return -1;
+  }
+  
+  private int findSmallestWindowBody(String url, Query q) {
+	return -1;
+  }
+  
+  private int findSmallestWindowHeaders(String url, Query q) {
+	return -1;
+  }
+  
+  private int findSmallestWindowAnchor(String url, Query q) {
+	return -1;
+  }
   
   /**
    * get boost score of one document and query pair.
