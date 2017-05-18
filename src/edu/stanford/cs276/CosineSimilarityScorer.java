@@ -1,24 +1,15 @@
 package edu.stanford.cs276;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
- * Skeleton code for the implementation of a 
+ * Skeleton code for the implementation of a
  * Cosine Similarity Scorer in Task 1.
  */
 public class CosineSimilarityScorer extends AScorer {
@@ -32,10 +23,10 @@ public class CosineSimilarityScorer extends AScorer {
   double bodyweight = 0.1;
   double headerweight = 0.1;
   double anchorweight = 0.1;
-  double smoothingBodyLength = 500.0; 
+  double smoothingBodyLength = 500.0;
 
   HashMap<String, Double> weights = new HashMap<String, Double>();
-  
+
   /**
    * Construct a Cosine Similarity Scorer.
    * @param idfs the map of idf values
@@ -60,7 +51,7 @@ public class CosineSimilarityScorer extends AScorer {
    */
   public double getNetScore(Map<String, Map<String, Double>> tfs, Query q, Map<String,Double> tfQuery, Document d) {
     double score = 0.0;
-    
+
     /*
      * TODO : Your code here
      * See Equation 2 in the handout regarding the net score
@@ -75,16 +66,16 @@ public class CosineSimilarityScorer extends AScorer {
     return score;
   }
 
-  //every term inside doc keyset should also be inside query		  
-  private double dotProduct(Map<String, Double> doc, Map<String, Double> query) {	  
+  //every term inside doc keyset should also be inside query
+  private double dotProduct(Map<String, Double> doc, Map<String, Double> query) {
 	  double ret = 0.0;
 	  for(String term : doc.keySet())
 		  ret += doc.get(term) * query.get(term);
 	  return ret;
   }
-  
+
   /**
-   * Normalize the term frequencies. 
+   * Normalize the term frequencies.
    * @param tfs the term frequencies
    * @param d the Document
    * @param q the Query
@@ -92,7 +83,7 @@ public class CosineSimilarityScorer extends AScorer {
   public void normalizeTFs(Map<String,Map<String, Double>> tfs,Document d, Query q) {
     /*
      * TODO : Your code here
-     * Note that we should give uniform normalization to all 
+     * Note that we should give uniform normalization to all
      * fields as discussed in the assignment handout.
      */
 
@@ -109,7 +100,7 @@ public class CosineSimilarityScorer extends AScorer {
       }
     }
   }
-  
+
   /**
    * Write the tuned parameters of cosineSimilarity to file.
    * Only used for grading purpose, you should NOT modify this method.
@@ -123,11 +114,11 @@ public class CosineSimilarityScorer extends AScorer {
       }
       FileWriter fw = new FileWriter(file.getAbsoluteFile());
       String[] names = {
-        "urlweight", "titleweight", "bodyweight", "headerweight", 
+        "urlweight", "titleweight", "bodyweight", "headerweight",
         "anchorweight", "smoothingBodyLength"
       };
       double[] values = {
-        this.urlweight, this.titleweight, this.bodyweight, 
+        this.urlweight, this.titleweight, this.bodyweight,
     this.headerweight, this.anchorweight, this.smoothingBodyLength
       };
       BufferedWriter bw = new BufferedWriter(fw);
@@ -147,7 +138,7 @@ public class CosineSimilarityScorer extends AScorer {
    * @param q the Query
    * @return the similarity score.
    */
-  public double getSimScore(Document d, Query q) {
+  public double getSimScore(Document d, Query q) throws UnsupportedEncodingException {
     Map<String,Map<String, Double>> tfs = this.getDocTermFreqs(d,q);
     this.normalizeTFs(tfs, d, q);
     Map<String,Double> tfQuery = getQueryFreqs(q);

@@ -16,7 +16,7 @@ import edu.stanford.cs276.util.Pair;
 public class Rank {
 
   /**
-   * Call this function to score and rank documents for some queries, 
+   * Call this function to score and rank documents for some queries,
    * using a specified scoring function.
    * @param queryDict
    * @param scoreType
@@ -24,11 +24,12 @@ public class Rank {
    * @return a mapping of queries to rankings
    */
   /**
-   * Call this function to score and rank documents for some queries, 
+   * Call this function to score and rank documents for some queries,
    * using a specified scoring function.
    * @return a mapping of queries to rankings
+ * @throws UnsupportedEncodingException
    */
-  private static Map<Query,List<Document>> score(Map<Query, Map<String, Document>> queryDict, String scoreType, Map<String,Double> idfs) {
+  private static Map<Query,List<Document>> score(Map<Query, Map<String, Document>> queryDict, String scoreType, Map<String,Double> idfs) throws UnsupportedEncodingException {
     AScorer scorer = null;
     if (scoreType.equals("baseline")) {
       scorer = new BaselineScorer();
@@ -72,7 +73,7 @@ public class Rank {
         	return o2.getSecond().compareTo(o1.getSecond());
         }
       });
-      
+
       //put completed rankings into map
       List<Document> curRankings = new ArrayList<Document>();
       for (Pair<Document,Double> docAndScore : docAndScores)
@@ -93,7 +94,7 @@ public class Rank {
         queryBuilder.append(s);
         queryBuilder.append(" ");
       }
-      
+
       System.out.println("query: " + queryBuilder.toString());
       for (Document res : queryRankings.get(query)) {
         System.out.println(
@@ -102,9 +103,9 @@ public class Rank {
           "    debug: " + res.debugStr
         );
       }
-    } 
+    }
   }
-  
+
   /**
     * Writes ranked results to file.
     * @param queryRankings the mapping of queries to rankings
@@ -117,21 +118,21 @@ public class Rank {
       if (!file.exists()) {
         file.createNewFile();
       }
-      
+
       FileWriter fw = new FileWriter(file.getAbsoluteFile());
       BufferedWriter bw = new BufferedWriter(fw);
-      
+
       for (Query query : queryRankings.keySet()) {
         StringBuilder queryBuilder = new StringBuilder();
         for (String s : query.queryWords) {
           queryBuilder.append(s);
           queryBuilder.append(" ");
         }
-        
+
         String queryStr = "query: " + queryBuilder.toString() + "\n";
         System.out.print(queryStr);
         bw.write(queryStr);
-        
+
         for (Document res : queryRankings.get(query)) {
           String urlString =
             "  url: " + res.url + "\n" +
@@ -140,7 +141,7 @@ public class Rank {
           System.out.print(urlString);
           bw.write(urlString);
         }
-      }  
+      }
       bw.close();
     } catch (IOException e) {
       e.printStackTrace();

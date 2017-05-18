@@ -39,8 +39,9 @@ public abstract class AScorer {
      * Score each document for each query.
      * @param d the Document
      * @param q the Query
+     * @throws UnsupportedEncodingException
      */
-  public abstract double getSimScore(Document d, Query q);
+  public abstract double getSimScore(Document d, Query q) throws UnsupportedEncodingException;
 
   /**
    * Get frequencies for a query.
