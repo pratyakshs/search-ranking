@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public class SmallestWindowScorer extends BM25Scorer {
   
-  HashSet<String> q_unique_terms = new HashSet<String>();
+  HashSet<String> q_terms = new HashSet<String>();
 	
   public SmallestWindowScorer(Map<String, Double> idfs, Map<Query,Map<String, Document>> queryDict) {
     super(idfs, queryDict);
@@ -30,10 +30,10 @@ public class SmallestWindowScorer extends BM25Scorer {
      * @//TODO : Your code here
      */
 	  
-	q_unique_terms.clear();
+	q_terms.clear();
 	
 	for(String s : q.queryWords)
-		q_unique_terms.add(s);
+		q_terms.add(s);
 
 	int smallestWindow = Integer.MAX_VALUE;
 	
@@ -105,7 +105,49 @@ public class SmallestWindowScorer extends BM25Scorer {
   }
   
   private int findSmallestWindowString(String[] words, Query q) {
-	  return -1;
+	  HashMap<String, Integer> freq = new HashMap<String, Integer>();
+	  
+	  int smallestWindow = Integer.MAX_VALUE;
+	  
+	  int start = 0;
+	  
+	  int num_terms = 0;
+	  
+	  for(int i = 0; i < words.length; i++) {
+		  String word = words[i];
+		  
+		  if (!q_terms.contains(word))
+			  continue;
+		  
+		  if(!freq.containsKey(word) || freq.get(word) == 0) {
+			  freq.put(word, 1);
+			  num_terms++;
+		  } else {
+			  freq.put(word, freq.get(word) + 1);
+			  
+			  if(num_terms > q_terms.size()) {
+				 //can try to remove some terms from the front
+				  
+				  while(start < i) {
+					  if (freq.get(words[start]) > 1) {
+						  freq.put(words[start], freq.get(words[start]) - 1);
+						  start++;
+						  num_terms--;
+						  
+						  if (smallestWindow > i - start + 1) {
+							  smallestWindow = i - start + 1;
+						  }
+					  }
+				  }
+			  }
+		  }
+	  }
+	  
+	  if (words.length - start < smallestWindow){
+		  smallestWindow = words.length - start;
+	  }
+	  
+	  return smallestWindow;
   }
   
   /**
@@ -121,7 +163,7 @@ public class SmallestWindowScorer extends BM25Scorer {
      *
      */
     
-    return 1 + (double)(B - 1) / (double)(smallestWindow - q_unique_terms.size() + 1);
+    return 1 + (double)(B - 1) / (double)(smallestWindow - q_terms.size() + 1);
   }
   
   @Override
