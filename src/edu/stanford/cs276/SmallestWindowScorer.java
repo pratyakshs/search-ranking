@@ -1,10 +1,15 @@
 package edu.stanford.cs276;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+
+import edu.stanford.cs276.util.Pair;
 
 /**
  * A skeleton for implementing the Smallest Window scorer in Task 3.
@@ -25,7 +30,7 @@ public class SmallestWindowScorer extends BM25Scorer {
    * @param d: document
    * @param q: query
    */  
-  private int getWindow(Document d, Query q) {
+  private int getWindow(Document d, Query q) throws UnsupportedEncodingException {
     /*
      * @//TODO : Your code here
      */
@@ -67,9 +72,9 @@ public class SmallestWindowScorer extends BM25Scorer {
     return smallestWindow;
   }
 
-  private int findSmallestWindowURL(String url, Query q) {
+  private int findSmallestWindowURL(String url, Query q) throws UnsupportedEncodingException {
 	  url = url.toLowerCase();
-	  return findSmallestWindowString(url.split("[^A-Za-z0-9 ]"), q);
+	  return findSmallestWindowString(urlSplit(url), q);
   }
   
   private int findSmallestWindowTitle(String title, Query q) {
@@ -77,31 +82,69 @@ public class SmallestWindowScorer extends BM25Scorer {
   }
   
   private int findSmallestWindowBody(Map<String, List<Integer>> body, Query q) {
-	return -1;
-  }
-  
-  private int findSmallestWindowHeaders(List<String> headers, Query q) {
-	int smallest = Integer.MAX_VALUE;
-	
-	for(String str : headers) {
-		int small = findSmallestWindowString(str.split(" "), q);
-		if (small < smallest)
-			smallest = small;
-	}	  
 	  
-	return smallest;
-  }
-  
-  private int findSmallestWindowAnchors(Map<String, Integer> anchors, Query q) {
-	int smallest = Integer.MAX_VALUE;
-	
-	for(String str : anchors.keySet()) {
-		int small = findSmallestWindowString(str.split(" "), q);
-		if (small < smallest)
-			smallest = small;
-	}	  
-	  
-	return smallest;
+    List<Pair<Integer, String>> q_list = new ArrayList<Pair<Integer, String>>();
+    
+    for(String q_word : body.keySet()) {
+    	for(int i : body.get(q_word)) {
+        	q_list.add(new Pair<Integer, String>(i, q_word));
+    	}
+    }
+
+    Collections.sort(q_list, new Comparator<Pair<Integer, String>>(){
+    	   @Override
+    	   public int compare(final Pair<Integer, String> lhs, Pair<Integer, String> rhs) {
+    	     //     return 1 if rhs should be before lhs 
+    	     //     return -1 if lhs should be before rhs
+    	     //     return 0 otherwise
+    		   
+    		   return lhs.getFirst() - rhs.getFirst();
+    	     }
+    	 });
+    
+
+    HashMap<String, Integer> freq = new HashMap<String, Integer>();
+    int smallestWindow = Integer.MAX_VALUE;
+    int start = 0;
+    int num_terms = 0;
+
+    for(int i = 0; i < q_list.size(); i++) {
+    	Pair<Integer, String> p = q_list.get(i);
+    	int index = p.getFirst();
+    	String word = p.getSecond();
+    	
+    	if (!freq.containsKey(word) || freq.get(word) == 0) {
+    		freq.put(word, 1);
+    		num_terms++;
+    	} else {
+    		freq.put(word,  freq.get(word) + 1);
+    		
+    		if (num_terms > q_terms.size()) {
+    			//can try to remove some terms from the front
+    			
+    			while(start < i) {
+    				String start_word = q_list.get(start).getSecond();
+    				
+    				if (freq.get(start_word) > 1) {
+    					freq.put(start_word,  freq.get(start_word) - 1);
+    					start++;
+    					num_terms--;
+    					
+    					if(smallestWindow > i - start + 1) {
+    						smallestWindow = i - start + 1;
+    					}
+    				} else {
+    					break;
+    				}
+    			}
+    		}
+    	}
+    }
+    
+    if (num_terms >= q_terms.size() && q_list.size() - start < smallestWindow)
+    	smallestWindow = q_list.size() - start;
+    
+	return smallestWindow;
   }
   
   private int findSmallestWindowString(String[] words, Query q) {
@@ -137,17 +180,42 @@ public class SmallestWindowScorer extends BM25Scorer {
 						  if (smallestWindow > i - start + 1) {
 							  smallestWindow = i - start + 1;
 						  }
+					  } else {
+						  break;
 					  }
 				  }
 			  }
 		  }
 	  }
 	  
-	  if (words.length - start < smallestWindow){
+	  if (num_terms >= q_terms.size() && words.length - start < smallestWindow)
 		  smallestWindow = words.length - start;
-	  }
 	  
 	  return smallestWindow;
+  }
+  
+  private int findSmallestWindowHeaders(List<String> headers, Query q) {
+	int smallest = Integer.MAX_VALUE;
+	
+	for(String str : headers) {
+		int small = findSmallestWindowString(str.split(" "), q);
+		if (small < smallest)
+			smallest = small;
+	}	  
+	  
+	return smallest;
+  }
+  
+  private int findSmallestWindowAnchors(Map<String, Integer> anchors, Query q) {
+	int smallest = Integer.MAX_VALUE;
+	
+	for(String str : anchors.keySet()) {
+		int small = findSmallestWindowString(str.split(" "), q);
+		if (small < smallest)
+			smallest = small;
+	}
+	  
+	return smallest;
   }
   
   /**
@@ -155,9 +223,9 @@ public class SmallestWindowScorer extends BM25Scorer {
    * @param d: document
    * @param q: query
    */  
-  private double getBoostScore (Document d, Query q) {
+  private double getBoostScore (Document d, Query q) throws UnsupportedEncodingException {
     int smallestWindow = getWindow(d, q);
-    double B = 5;
+    double B = 2;
     /*
      * @//TODO : Your code here, calculate the boost score.
      *
@@ -167,7 +235,7 @@ public class SmallestWindowScorer extends BM25Scorer {
   }
   
   @Override
-  public double getSimScore(Document d, Query q) {
+  public double getSimScore(Document d, Query q) throws UnsupportedEncodingException {
     Map<String,Map<String, Double>> tfs = this.getDocTermFreqs(d,q);
     this.normalizeTFs(tfs, d, q);
     Map<String,Double> tfQuery = getQueryFreqs(q);
