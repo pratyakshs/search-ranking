@@ -17,6 +17,9 @@ class Stemmer
                j, k;
    private static final int INC = 50;
                      /* unit of size whereby b is increased */
+   
+   public static boolean useStemming = true;
+   
    public Stemmer()
    {  b = new char[INC];
       i = 0;

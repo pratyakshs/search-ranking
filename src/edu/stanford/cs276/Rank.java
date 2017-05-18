@@ -1,6 +1,7 @@
 package edu.stanford.cs276;
 
 import java.io.*;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,6 +24,9 @@ public class Rank {
    * @param idfs
    * @return a mapping of queries to rankings
    */
+	
+	static Stemmer stemmer = new Stemmer();
+	
   /**
    * Call this function to score and rank documents for some queries,
    * using a specified scoring function.
@@ -31,6 +35,7 @@ public class Rank {
    */
   private static Map<Query,List<Document>> score(Map<Query, Map<String, Document>> queryDict, String scoreType, Map<String,Double> idfs) throws UnsupportedEncodingException {
     AScorer scorer = null;
+    
     if (scoreType.equals("baseline")) {
       scorer = new BaselineScorer();
     } else if (scoreType.equals("cosine")) {
@@ -57,7 +62,16 @@ public class Rank {
         String debugStr = scorer.getDebugStr(doc, query).trim().replace("\n", " ");
         doc.debugStr = debugStr.substring(0, Math.min(debugStr.length(), 200));
 
-        double score = scorer.getSimScore(doc, query);
+        double score = 0;
+        
+        if (Stemmer.useStemming) {
+	        Query stemmed_query = getStemmedQuery(query);
+	        Document stemmed_document = getStemmedDocument(doc);
+	        score = scorer.getSimScore(stemmed_document, stemmed_query);
+        } else {
+            score = scorer.getSimScore(doc, query);
+        }
+        
         docAndScores.add(new Pair<Document, Double>(doc, score));
       }
 
@@ -83,6 +97,95 @@ public class Rank {
     return queryRankings;
   }
 
+  private static Query getStemmedQuery(Query query) {	  
+      Query stemmed_query = new Query("");
+      stemmed_query.queryWords.clear();
+      
+      for(String word : query.queryWords)
+      	stemmed_query.queryWords.add(stemmer.stemWord(word));
+      
+      return stemmed_query;
+  }
+  
+  private static Document getStemmedDocument(Document doc) throws UnsupportedEncodingException {
+	  Stemmer stemmer = new Stemmer();
+	  Document stemmed_doc = new Document("");
+
+	  //Stem the url
+      String decoded = URLDecoder.decode(doc.url, "UTF-8");
+      stemmed_doc.url = stem_words(decoded.split("[^A-Za-z0-9]+"));
+
+	  //Stem the title
+      stemmed_doc.title = stem_words(doc.title.split("\\s+"));
+	  
+	  //Stem the headers
+	  for(String header : doc.headers)
+		  stemmed_doc.headers.add(stem_words(header.split("\\s+")));
+	  
+	  //Stem the body hits
+	  stemmed_doc.body_hits = stemBodyHits(doc.body_hits);
+	  
+	  //Stem the anchors
+	  stemmed_doc.anchors = stemAnchors(doc.anchors);
+	  
+	  return stemmed_doc;
+  }
+  
+  private static Map<String, Integer> stemAnchors(Map<String, Integer> anchors) {
+	  Map<String, Integer> stemmed_anchors = new HashMap<String, Integer>();
+	  
+	  for(String unstemmed_anchor : anchors.keySet()) {
+		  String stemmed_anchor = stem_words(unstemmed_anchor.split("\\s+"));
+		  
+		  if(stemmed_anchors.containsKey(stemmed_anchor)) {
+			  stemmed_anchors.put(stemmed_anchor, stemmed_anchors.get(stemmed_anchor) + anchors.get(unstemmed_anchor));
+		  } else {
+			  stemmed_anchors.put(stemmed_anchor, anchors.get(unstemmed_anchor));
+		  }
+	  }
+	  
+	  return stemmed_anchors;
+  }
+  
+  private static Map<String, List<Integer>> stemBodyHits(Map<String, List<Integer>> body_hits) {
+	  HashMap<String, List<Integer>> stemmed_body_hits = new HashMap<String, List<Integer>>();
+	  
+	  for(String unstemmed_key : body_hits.keySet()) {
+		  
+		  String key = stemmer.stemWord(unstemmed_key);
+		  
+		  if(stemmed_body_hits.containsKey(key)) {
+			  stemmed_body_hits.get(key).addAll(body_hits.get(unstemmed_key));
+		  } else {
+			  ArrayList<Integer> list = new ArrayList<Integer>();
+			  list.addAll(body_hits.get(unstemmed_key));
+			  stemmed_body_hits.put(key, list);
+		  }
+	  }
+	  
+	  for(String key : stemmed_body_hits.keySet()) {
+		  Collections.sort(stemmed_body_hits.get(key));
+	  }
+	  
+	  return stemmed_body_hits;
+  }
+  
+  private static String stem_words(String[] words) {
+	StringBuilder sb = new StringBuilder();
+	
+	for(int i = 0; i < words.length; i++) {
+		if(i == 0)
+			sb.append(stemmer.stemWord(words[i]));
+		else {
+			sb.append(" ");
+			sb.append(stemmer.stemWord(words[i]));
+		}
+	}
+	
+	return sb.toString();
+  }
+	
+  
   /**
     * Print ranked results.
     * @param queryRankings the mapping of queries to rankings
