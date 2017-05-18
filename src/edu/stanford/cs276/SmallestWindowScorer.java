@@ -20,7 +20,7 @@ import edu.stanford.cs276.util.Pair;
 public class SmallestWindowScorer extends CosineSimilarityScorer/*BM25Scorer*/ {
   
   HashSet<String> q_terms = new HashSet<String>();
-  double B = 15;
+  double B = 5;
   int windowSize = -1;
   double boostScore = -1;
   
