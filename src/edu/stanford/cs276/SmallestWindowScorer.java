@@ -225,7 +225,7 @@ public class SmallestWindowScorer extends BM25Scorer {
    */  
   private double getBoostScore (Document d, Query q) throws UnsupportedEncodingException {
     int smallestWindow = getWindow(d, q);
-    double B = 5;
+    double B = 2;
     /*
      * @//TODO : Your code here, calculate the boost score.
      *
