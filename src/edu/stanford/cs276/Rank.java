@@ -107,7 +107,7 @@ public class Rank {
     return queryRankings;
   }
 
-  private static Query getStemmedQuery(Query query) {
+  public static Query getStemmedQuery(Query query) {
       Query stemmed_query = new Query("");
       stemmed_query.queryWords.clear();
 
@@ -117,7 +117,7 @@ public class Rank {
       return stemmed_query;
   }
 
-  private static Document getStemmedDocument(Document doc) throws UnsupportedEncodingException {
+  public static Document getStemmedDocument(Document doc) throws UnsupportedEncodingException {
       Document stemmed_doc = new Document(doc.url);
 
       //Stem the url
