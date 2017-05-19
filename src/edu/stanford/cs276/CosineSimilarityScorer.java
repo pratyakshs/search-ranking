@@ -18,12 +18,12 @@ public class CosineSimilarityScorer extends AScorer {
    * TODO: You will want to tune the values for
    * the weights for each field.
    */
-  double urlweight = 0.1;
-  double titleweight  = 0.3;
-  double bodyweight = 0.2;
-  double headerweight = 0.3;
-  double anchorweight = 0.2;
-  double smoothingBodyLength = 500.0;
+  double urlweight = 0.8;
+  double titleweight  = 1.2;
+  double bodyweight = 0.15;
+  double headerweight = 0.8;
+  double anchorweight = 0.8;
+  double smoothingBodyLength = 5600.0;
 
   HashMap<String, Double> weights = new HashMap<String, Double>();
 
@@ -58,9 +58,11 @@ public class CosineSimilarityScorer extends AScorer {
      * between a query vector and the term score vectors
      * for a document.
      */
-
+    System.err.println(q + d.url);
     for(String type : tfs.keySet()) {
-      score += weights.get(type) * dotProduct(tfs.get(type), tfQuery);
+      double dotProd = dotProduct(tfs.get(type), tfQuery);
+      System.err.println(type + " " + 1e4 * dotProd);
+      score += weights.get(type) * dotProd;
     }
 
     return score;

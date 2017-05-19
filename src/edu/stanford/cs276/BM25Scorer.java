@@ -18,22 +18,22 @@ public class BM25Scorer extends AScorer {
   /*
    *  TODO: You will want to tune these values
    */
-  double urlweight = 0.1;
-  double titleweight  = 0.1;
-  double bodyweight = 0.1;
-  double headerweight = 0.1;
-  double anchorweight = 0.1;
+    double urlweight = 0.8;
+    double titleweight  = 1.2;
+    double bodyweight = 0.05;
+    double headerweight = 0.8;
+    double anchorweight = 0.25;
 
   // BM25-specific weights
-  double burl = 0.1;
-  double btitle = 0.1;
-  double bheader = 0.1;
-  double bbody = 0.1;
-  double banchor = 0.1;
+  double burl = 0.2;
+  double btitle = 1.5;
+  double bheader = 0.8;
+  double bbody = 0.3;
+  double banchor = 0.3;
 
-  double k1 = 0.1;
-  double pageRankLambda = 0.1;
-  double pageRankLambdaPrime = 0.1;
+  double k1 = 1;
+  double pageRankLambda = 5;
+  double pageRankLambdaPrime = 3;
 
   // query -> url -> document
   Map<Query,Map<String, Document>> queryDict;
@@ -81,6 +81,9 @@ public class BM25Scorer extends AScorer {
     // url -> header
     Map<String, Set<String>> headers = new HashMap<String, Set<String>>();
 
+    // url -> body
+    Map<String, Map<String, Integer>> bodyHits = new HashMap<String, Map<String, Integer>>();
+
     for (Query query : queryDict.keySet()) {
         for (String url : queryDict.get(query).keySet()) {
           Document doc = queryDict.get(query).get(url);
@@ -110,6 +113,13 @@ public class BM25Scorer extends AScorer {
               // body
               double bodyLen = doc.body_length;
               dmap.put("body", bodyLen);
+//              Map<String, Integer> curBodyHits = new HashMap<String, Integer>();
+//              if (doc.body_hits != null) {
+//                  for (String bodyWord : doc.body_hits.keySet()) {
+//                      curBodyHits.put(bodyWord, doc.body_hits.get(bodyWord).size());
+//                  }
+//              }
+//              bodyHits.put(url, curBodyHits);
 
               // anchor
               Map<String, Integer> curAnchors = null;
@@ -135,7 +145,7 @@ public class BM25Scorer extends AScorer {
         }
     }
 
-    // sum up lengths for anchors and headers
+    // sum up lengths for anchors and headers and body
     for (Document doc : lengths.keySet()) {
         String url = doc.url;
         double anchorLen = 0;
@@ -149,6 +159,12 @@ public class BM25Scorer extends AScorer {
             headerLen += header.split("\\s+").length;
         }
         lengths.get(doc).put("header", headerLen);
+
+//        double bodyLen = 0;
+//        for (String word : bodyHits.get(url).keySet()) {
+//            bodyLen += bodyHits.get(url).get(word);
+//        }
+//        lengths.get(doc).put("body", bodyLen);
     }
 
     double numDocs = lengths.size();
@@ -167,7 +183,7 @@ public class BM25Scorer extends AScorer {
 
     // extract the pagerank scores
     for (Document doc : lengths.keySet()) {
-        pagerankScores.put(doc, (double) Math.log(doc.page_rank));
+        pagerankScores.put(doc, (double) Math.log(pageRankLambdaPrime + doc.page_rank));
     }
 
   }
@@ -198,21 +214,28 @@ public class BM25Scorer extends AScorer {
         double wdt = 0.;
         if (tfs.get("url").containsKey(qWord)) {
             wdt += urlweight * tfs.get("url").get(qWord);
+//            System.err.println("url: " + urlweight * tfs.get("url").get(qWord));
         }
         if (tfs.get("title").containsKey(qWord)) {
             wdt += titleweight * tfs.get("title").get(qWord);
+//            System.err.println("title: " + titleweight * tfs.get("title").get(qWord));
         }
         if (tfs.get("body").containsKey(qWord)) {
             wdt += bodyweight * tfs.get("body").get(qWord);
+//            System.err.println("body: " + bodyweight * tfs.get("body").get(qWord));
         }
         if (tfs.get("header").containsKey(qWord)) {
             wdt += headerweight * tfs.get("header").get(qWord);
+//            System.err.println("header: " + headerweight * tfs.get("header").get(qWord));
         }
         if (tfs.get("anchor").containsKey(qWord)) {
             wdt += anchorweight * tfs.get("anchor").get(qWord);
+//            System.err.println("anchor: " + anchorweight * tfs.get("anchor").get(qWord));
         }
+//        System.err.println((wdt));
         score += (wdt * idf_weight) / (k1 + wdt);
     }
+    System.err.println(pageRankLambda * pagerankScores.get(d));
     score += pageRankLambda * pagerankScores.get(d);
     return score;
   }
@@ -299,7 +322,12 @@ public class BM25Scorer extends AScorer {
     // This is only used for grading purposes.
     // You should NOT modify the writeParaValues method.
     writeParaValues("bm25Para.txt");
-    return getNetScore(tfs,q,tfQuery,d);
+
+//    CosineSimilarityScorer scorer = new CosineSimilarityScorer(idfs);
+    double score1 = getNetScore(tfs,q,tfQuery,d);
+//    double score2 = scorer.getSimScore(d, q);
+//    System.err.println(q + " "+ score1 + " " + score2);
+    return 1 * score1;// + 000 * score2;
   }
 
 }
