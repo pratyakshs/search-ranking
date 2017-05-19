@@ -1,15 +1,22 @@
 package edu.stanford.cs276;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Comparator;
 
 import edu.stanford.cs276.util.Pair;
+import edu.stanford.nlp.process.Americanize;
+import edu.stanford.nlp.process.CoreTokenFactory;
+//import edu.stanford.nlp.process.
 
 /**
  * The entry class for this programming assignment.
@@ -25,6 +32,9 @@ public class Rank {
    * @return a mapping of queries to rankings
    */
 	
+	//PTBLexer temp;
+	//CoreTokenFactory ctf;
+	//Americanize am = new Americanize();
 	static Stemmer stemmer = new Stemmer();
 	
   /**
@@ -102,7 +112,7 @@ public class Rank {
       stemmed_query.queryWords.clear();
       
       for(String word : query.queryWords)
-      	stemmed_query.queryWords.add(stemmer.stemWord(word));
+      	stemmed_query.queryWords.add(stemmer.stem(word));
       
       return stemmed_query;
   }
@@ -112,28 +122,89 @@ public class Rank {
 
 	  //Stem the url
 	  if (doc.url != null) {
+		  //System.err.println("old url = " + doc.url);
 	      String decoded = URLDecoder.decode(doc.url, "UTF-8");
 	      stemmed_doc.url = stem_words(decoded.split("[^A-Za-z0-9]+"));
+	      //System.err.println("stemmed url = " + stemmed_doc.url);
 	  }
 
 	  //Stem the title
-	  if (doc.title != null)
+	  if (doc.title != null){
+		  //System.err.println("old title = " + doc.title);
 		  stemmed_doc.title = stem_words(doc.title.split("\\s+"));
+		  //System.err.println("new title = " + stemmed_doc.title);
+	  }
 	  
 	  //Stem the headers
 	  if (doc.headers != null) {
 		  stemmed_doc.headers = new ArrayList<String>();
+
+		  /*
+		  System.err.println("old header");
+		  for(String str : doc.headers) {
+			  System.err.print(str + ", ");
+		  }
+		  System.err.println();
+		  */
+		  
 		  for(String header : doc.headers)
 			  stemmed_doc.headers.add(stem_words(header.split("\\s+")));
+
+		  /*
+		  System.err.println("new header");
+		  for(String str : stemmed_doc.headers) {
+			  System.err.print(str + ", ");
+		  }
+		  System.err.println();
+		  */
 	  }
 	  
 	  //Stem the body hits
-	  if (doc.body_hits != null)
+	  if (doc.body_hits != null) {
+		  /*
+		  for(String str : doc.body_hits.keySet()) {
+			  List<Integer> list = doc.body_hits.get(str);
+			  System.err.print("body_hits old word = " + str);
+			  for(int i = 0; i < list.size(); i++) {
+				  System.err.print(list.get(i) + " ");
+			  }
+		  }
+		  System.err.println();
+		  */
+		  
 		  stemmed_doc.body_hits = stemBodyHits(doc.body_hits);
+
+		  /*
+		  for(String str : stemmed_doc.body_hits.keySet()) {
+			  List<Integer> list = stemmed_doc.body_hits.get(str);
+			  System.err.print("body_hits new word = " + str);
+			  for(int i = 0; i < list.size(); i++) {
+				  System.err.print(list.get(i) + " ");
+			  }
+		  }
+		  System.err.println();
+		  */
+	  }
 	  
 	  //Stem the anchors
 	  if (doc.anchors != null) {
+		  /*
+		  System.err.println("old anchors");
+		  for(String str : doc.anchors.keySet()) {
+			  System.err.print(str + ": " + doc.anchors.get(str) + ", ");
+		  }
+		  System.err.println();
+		  */
+		  
 		  stemmed_doc.anchors = stemAnchors(doc.anchors);		  
+
+		  /*
+		  System.err.println("new anchors");
+		  for(String str : stemmed_doc.anchors.keySet()) {
+			  System.err.print(str + ": " + stemmed_doc.anchors.get(str) + ", ");
+		  }
+		  System.err.println();
+		  */
 	  }
 
 	  return stemmed_doc;
@@ -160,7 +231,7 @@ public class Rank {
 	  
 	  for(String unstemmed_key : body_hits.keySet()) {
 		  
-		  String key = stemmer.stemWord(unstemmed_key);
+		  String key = stemmer.stem(unstemmed_key);
 		  
 		  if(stemmed_body_hits.containsKey(key)) {
 			  stemmed_body_hits.get(key).addAll(body_hits.get(unstemmed_key));
@@ -183,10 +254,10 @@ public class Rank {
 	
 	for(int i = 0; i < words.length; i++) {
 		if(i == 0)
-			sb.append(stemmer.stemWord(words[i]));
+			sb.append(stemmer.stem(words[i]));
 		else {
 			sb.append(" ");
-			sb.append(stemmer.stemWord(words[i]));
+			sb.append(stemmer.stem(words[i]));
 		}
 	}
 	

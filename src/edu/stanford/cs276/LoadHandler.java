@@ -182,7 +182,7 @@ public class LoadHandler {
 
                 for (String token : tokens) {
                 	if (Stemmer.useStemming) {
-                		terms_in_doc.add(stemmer.stemWord(token));
+                		terms_in_doc.add(stemmer.stem(token));
                 	}
                 	else
                 		terms_in_doc.add(token);
