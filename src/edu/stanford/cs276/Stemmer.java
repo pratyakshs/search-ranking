@@ -25,14 +25,14 @@ public class Stemmer/* implements Function<Word,Word> */{
 
   //Turns stemming on and off in LoadHandler.java and Rank.java
   public static boolean useStemming = false;
-	
+
   private char[] b;
   private int i,     /* offset into b */
   i_end, /* offset to end of stemmed word */
   j, k;
   private static final int INC = 50;
 
-  
+
   /* unit of size whereby b is increased */
   public Stemmer() {
     b = new char[INC];
@@ -598,10 +598,10 @@ public class Stemmer/* implements Function<Word,Word> */{
     }
     stem();
     String ret = toString();
-    
+
     //System.err.println("original = " + s);
     //System.err.println("stemmed  = " + ret);
-    
+
     return ret;
   }
 

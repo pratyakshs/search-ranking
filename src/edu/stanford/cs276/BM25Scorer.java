@@ -235,7 +235,7 @@ public class BM25Scorer extends AScorer {
 //        System.err.println((wdt));
         score += (wdt * idf_weight) / (k1 + wdt);
     }
-    System.err.println(pageRankLambda * pagerankScores.get(d));
+//    System.err.println(pageRankLambda * pagerankScores.get(d));
     score += pageRankLambda * pagerankScores.get(d);
     return score;
   }
