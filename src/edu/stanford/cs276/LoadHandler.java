@@ -29,7 +29,6 @@ public class LoadHandler {
    * @return the mapping of Query-url-Document
    */
 
-
   public static String no_word_in_doc_idf_val = "AbsolutelyRandomStringDanielHsu1219051035015";
 
   public static Map<Query,Map<String, Document>> loadTrainData(String feature_file_name) throws Exception {
@@ -154,7 +153,8 @@ public class LoadHandler {
      * 2) Total number of documents containing each term
      * Hint: consult PA1 for how to load each file in each block
      */
-
+    Stemmer stemmer = new Stemmer();
+    
     /* A filter to get rid of all files starting with .*/
     FileFilter filter = new FileFilter() {
         @Override
@@ -180,8 +180,13 @@ public class LoadHandler {
                 line = line.toLowerCase();
                 String[] tokens = line.trim().split("\\s+");
 
-                for (String token : tokens)
-                	terms_in_doc.add(token);
+                for (String token : tokens) {
+                	if (Stemmer.useStemming) {
+                		terms_in_doc.add(stemmer.stem(token));
+                	}
+                	else
+                		terms_in_doc.add(token);
+                }
             }
 
             for(String token : terms_in_doc) {
