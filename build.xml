@@ -70,6 +70,11 @@
           target="1.7"
           source="1.7"
          includeantruntime="false">
+         <classpath>
+               <fileset dir="stanford-corenlp-full-2016-10-31">
+                  <include name="**/*.jar" />
+               </fileset>
+         </classpath>
     </javac>
 
   </target>
