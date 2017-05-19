@@ -108,26 +108,34 @@ public class Rank {
   }
   
   private static Document getStemmedDocument(Document doc) throws UnsupportedEncodingException {
-	  Stemmer stemmer = new Stemmer();
-	  Document stemmed_doc = new Document("");
+	  Document stemmed_doc = new Document(doc.url);
 
 	  //Stem the url
-      String decoded = URLDecoder.decode(doc.url, "UTF-8");
-      stemmed_doc.url = stem_words(decoded.split("[^A-Za-z0-9]+"));
+	  if (doc.url != null) {
+	      String decoded = URLDecoder.decode(doc.url, "UTF-8");
+	      stemmed_doc.url = stem_words(decoded.split("[^A-Za-z0-9]+"));
+	  }
 
 	  //Stem the title
-      stemmed_doc.title = stem_words(doc.title.split("\\s+"));
+	  if (doc.title != null)
+		  stemmed_doc.title = stem_words(doc.title.split("\\s+"));
 	  
 	  //Stem the headers
-	  for(String header : doc.headers)
-		  stemmed_doc.headers.add(stem_words(header.split("\\s+")));
+	  if (doc.headers != null) {
+		  stemmed_doc.headers = new ArrayList<String>();
+		  for(String header : doc.headers)
+			  stemmed_doc.headers.add(stem_words(header.split("\\s+")));
+	  }
 	  
 	  //Stem the body hits
-	  stemmed_doc.body_hits = stemBodyHits(doc.body_hits);
+	  if (doc.body_hits != null)
+		  stemmed_doc.body_hits = stemBodyHits(doc.body_hits);
 	  
 	  //Stem the anchors
-	  stemmed_doc.anchors = stemAnchors(doc.anchors);
-	  
+	  if (doc.anchors != null) {
+		  stemmed_doc.anchors = stemAnchors(doc.anchors);		  
+	  }
+
 	  return stemmed_doc;
   }
   

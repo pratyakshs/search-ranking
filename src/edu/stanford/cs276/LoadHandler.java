@@ -181,8 +181,9 @@ public class LoadHandler {
                 String[] tokens = line.trim().split("\\s+");
 
                 for (String token : tokens) {
-                	if (Stemmer.useStemming)
+                	if (Stemmer.useStemming) {
                 		terms_in_doc.add(stemmer.stemWord(token));
+                	}
                 	else
                 		terms_in_doc.add(token);
                 }

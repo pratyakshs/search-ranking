@@ -23,7 +23,7 @@ public class CosineSimilarityScorer extends AScorer {
   double bodyweight = 0.2;
   double headerweight = 0.3;
   double anchorweight = 0.2;
-  double smoothingBodyLength = 500.0;
+  double smoothingBodyLength = 5000.0;
 
   HashMap<String, Double> weights = new HashMap<String, Double>();
 
