@@ -19,7 +19,7 @@ public class NdcgMain {
       );
       System.exit(1);
     }
-      
+
     //query -> List of Pair<url, document>
     HashMap<String, List<Pair<String, Document>>> queryRankings =
       new HashMap<String, List<Pair<String, Document>>>();
