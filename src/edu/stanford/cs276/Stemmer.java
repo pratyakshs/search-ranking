@@ -1,15 +1,7 @@
 package edu.stanford.cs276;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Iterator;
-
-//import java.util.function.Function;
-
-
 import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.process.PTBTokenizer;
+//import java.util.function.Function;
 
 /**
  * Stemmer, implementing the Porter Stemming Algorithm
