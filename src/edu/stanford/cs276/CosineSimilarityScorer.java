@@ -58,10 +58,10 @@ public class CosineSimilarityScorer extends AScorer {
      * between a query vector and the term score vectors
      * for a document.
      */
-    System.err.println(q + d.url);
+//    System.err.println(q + d.url);
     for(String type : tfs.keySet()) {
       double dotProd = dotProduct(tfs.get(type), tfQuery);
-      System.err.println(type + " " + 1e4 * dotProd);
+//      System.err.println(type + " " + 1e4 * dotProd);
       score += weights.get(type) * dotProd;
     }
 

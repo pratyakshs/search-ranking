@@ -195,17 +195,17 @@ public abstract class AScorer {
   private int num_occurances_url(String url, String shortStr) throws UnsupportedEncodingException {
       url = url.toLowerCase();
       String[] words = urlSplit(url);
-      
+
       /*
       System.err.println("\nurl words\n\n");
-      
+
       System.err.println("url is = " + url + "\n\n");
-      
+
       for(String str : words) {
     	  System.err.print(str + ", ");
       }
       */
-      
+
       int count = 0;
 
       for(String word : words)
