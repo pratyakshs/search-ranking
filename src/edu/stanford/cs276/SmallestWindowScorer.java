@@ -17,16 +17,16 @@ import edu.stanford.cs276.util.Pair;
  * have to use Task 2. (You could also use Task 1, in which case, you'd probably like to extend CosineSimilarityScorer instead.)
  * Also, feel free to modify or add helpers inside this class.
  */
-public class SmallestWindowScorer extends CosineSimilarityScorer/*BM25Scorer*/ {
+public class SmallestWindowScorer extends /*CosineSimilarityScorer*/BM25Scorer {
   
   HashSet<String> q_terms = new HashSet<String>();
-  double B = 5;
+  double B = 1.2;
   int windowSize = -1;
   double boostScore = -1;
   
-  public SmallestWindowScorer(Map<String, Double> idfs, Map<Query,Map<String, Document>> queryDict) {
-    //super(idfs, queryDict);
-	  super(idfs);
+  public SmallestWindowScorer(Map<String, Double> idfs, Map<Query,Map<String, Document>> queryDict)  throws UnsupportedEncodingException {
+    super(idfs, queryDict);
+	//super(idfs);
   }
 
   /**
@@ -75,7 +75,8 @@ public class SmallestWindowScorer extends CosineSimilarityScorer/*BM25Scorer*/ {
 	
 	windowSize = smallestWindow;
 	
-    return Math.abs(smallestWindow - q_terms.size()); //return difference between window size |Q|
+    //return Math.abs(smallestWindow - q_terms.size()); //return difference between window size |Q|
+	return windowSize;
   }
 
   private int findSmallestWindowURL(String url, Query q) throws UnsupportedEncodingException {
@@ -237,16 +238,17 @@ public class SmallestWindowScorer extends CosineSimilarityScorer/*BM25Scorer*/ {
      */
     
     //e^-x - with window difference
-    boostScore = 1 + B * Math.exp(-smallestWindow);
+    //boostScore = 1 + B * Math.exp(-smallestWindow);
     
     //1/x - with window difference
     //boostScore = 1 + (double)(B - 1) / (double)(x + 1);
     
     //e^-x - with absolute window size
-    //boostScore = (B - 1) * Math.exp(q_terms.size()) * Math.exp(-smallestWindow) + 1;
+    boostScore = (B - 1) * Math.exp(q_terms.size()) * Math.exp(-smallestWindow) + 1;
     
-    // 1/x - with absolue window size
+    // 1/x - with absolute window size
     //boostScore = 1 + (double)(B - 1) / (double)(smallestWindow - q_terms.size() + 1);
+    
     return boostScore;
   }
   
