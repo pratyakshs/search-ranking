@@ -56,7 +56,13 @@ public class BM25Scorer extends AScorer {
      */
     public BM25Scorer(Map<String,Double> idfs, Map<Query,Map<String, Document>> queryDict) throws UnsupportedEncodingException {
       super(idfs);
-      this.queryDict = queryDict;
+      
+      if (Stemmer.useStemming) {
+    	  this.queryDict = Rank.getQueryDictStemmed(queryDict);
+      }
+      else
+    	  this.queryDict = queryDict;
+      
       this.calcAverageLengths();
     }
 
@@ -90,12 +96,16 @@ public class BM25Scorer extends AScorer {
           if (lengths.containsKey(doc)) {
               Map<String, Double> dmap = lengths.get(doc);
               // only update header, anchor
-              for (String anchor : doc.anchors.keySet()) {
-                  anchors.get(url).put(anchor, doc.anchors.get(anchor));
+              if (doc.anchors != null) {
+	              for (String anchor : doc.anchors.keySet()) {
+	                  anchors.get(url).put(anchor, doc.anchors.get(anchor));
+	              }
               }
 
-              for (String header : doc.headers) {
-                  headers.get(url).add(header);
+              if (doc.headers != null) {
+	              for (String header : doc.headers) {
+	                  headers.get(url).add(header);
+	              }
               }
 
           } else {
@@ -145,6 +155,13 @@ public class BM25Scorer extends AScorer {
         }
     }
 
+    
+    /*
+    for(Document d : lengths.keySet()) {
+    	System.err.println(d.title);
+    }
+    */
+    
     // sum up lengths for anchors and headers and body
     for (Document doc : lengths.keySet()) {
         String url = doc.url;
@@ -252,6 +269,25 @@ public class BM25Scorer extends AScorer {
    * Use equation 3 in the writeup to normalize the raw term frequencies
    * in fields in document d.
    */
+	  
+	  if (!lengths.containsKey(d)){
+		  System.err.println("\nlengths doesn't contain document d\n");
+		  System.err.println(d.toString());
+		  System.err.println("str hashcode" + d.toString().hashCode());
+		  System.err.println("hash code = " + d.hashCode());
+		  
+		  for(Document doc_iter : lengths.keySet()) {
+			  if(doc_iter.title.equals(d.title)) {
+				  System.err.println("\n\npotential document does exist in lengths with that title\n");
+				  System.err.println(doc_iter.toString());
+				  System.err.println("str hashcode" + doc_iter.toString().hashCode());
+				  System.err.println("hash code = " + doc_iter.hashCode());
+				  
+				  System.err.println();
+			  }
+		  }
+	  }
+	  
       for (String tfType : this.TFTYPES) {
           for (String qWord : tfs.get(tfType).keySet()) {
               double numerator = tfs.get(tfType).get(qWord);
@@ -313,6 +349,7 @@ public class BM25Scorer extends AScorer {
    * @param q the Query
    * @return the similarity score
    */
+  
   public double getSimScore(Document d, Query q) throws UnsupportedEncodingException {
     Map<String,Map<String, Double>> tfs = this.getDocTermFreqs(d,q);
     this.normalizeTFs(tfs, d, q);

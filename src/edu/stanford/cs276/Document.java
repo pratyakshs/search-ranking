@@ -34,6 +34,16 @@ public class Document {
     this.url=url;
   }
   
+  @Override
+  public int hashCode() {
+	  return this.toString().hashCode();
+  }
+  
+  @Override
+  public boolean equals(Object d) {
+	  return this.hashCode() == d.hashCode();
+  }
+  
   /**
    * Returns a String representation of a Document.
    * @return the String of fields representing a Document

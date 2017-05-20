@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -49,7 +50,7 @@ public class LoadHandler {
       String[] tokens = line.split(":", 2);
       String key = tokens[0].trim();
       String value = tokens[1].trim();
-
+      
       if (key.equals("query")) {
         query = new Query(value);
         queryDict.put(query, new HashMap<String, Document>());
@@ -98,7 +99,7 @@ public class LoadHandler {
     }
 
     reader.close();
-
+    
     return queryDict;
   }
 

@@ -75,9 +75,7 @@ public class Rank {
         double score = 0;
 
         if (Stemmer.useStemming) {
-            Query stemmed_query = getStemmedQuery(query);
-            Document stemmed_document = getStemmedDocument(doc);
-            score = scorer.getSimScore(stemmed_document, stemmed_query);
+            score = scorer.getSimScore(getStemmedDocument(doc), getStemmedQuery(query));
         } else {
             score = scorer.getSimScore(doc, query);
         }
@@ -105,6 +103,35 @@ public class Rank {
       queryRankings.put(query, curRankings);
     }
     return queryRankings;
+  }
+  
+  public static Map<Query,Map<String, Document>> getQueryDictStemmed(Map<Query,Map<String, Document>> queryDict) throws UnsupportedEncodingException {
+	  
+	    /* Feature dictionary: Query -> (url -> Document)  */
+	    Map<Query,Map<String, Document>> queryDict_stemmed =  new HashMap<Query,Map<String, Document>>();
+	    
+	    for(Query q : queryDict.keySet()) {
+	    	
+	    	Query q_stemmed = Rank.getStemmedQuery(q);
+
+	    	if (!queryDict_stemmed.containsKey(q_stemmed))
+	    		queryDict_stemmed.put(q_stemmed, new HashMap<String, Document>());
+	    	
+	    	Map<String, Document> url_to_doc = queryDict.get(q);
+
+	    	for(String url_i : url_to_doc.keySet()) {
+	    		
+	        	  Document unstemmed_doc = queryDict.get(q).get(url_i);
+	    		  Document stemmed_doc = getStemmedDocument(unstemmed_doc);
+	    	  
+	              String decoded = URLDecoder.decode(url_i, "UTF-8");
+	              String stemmed_url = Rank.stem_words(decoded.split("[^A-Za-z0-9]+"));
+	    		  
+	    		  queryDict_stemmed.get(q_stemmed).put(stemmed_url, stemmed_doc);
+	    	}
+	    }
+	    
+	    return queryDict_stemmed;
   }
 
   public static Query getStemmedQuery(Query query) {
@@ -207,6 +234,10 @@ public class Rank {
           */
       }
 
+      stemmed_doc.body_length = doc.body_length;
+      stemmed_doc.page_rank = doc.page_rank;
+      stemmed_doc.debugStr = doc.debugStr;
+      
       return stemmed_doc;
   }
 
@@ -225,7 +256,7 @@ public class Rank {
 
       return stemmed_anchors;
   }
-
+  
   private static Map<String, List<Integer>> stemBodyHits(Map<String, List<Integer>> body_hits) {
       HashMap<String, List<Integer>> stemmed_body_hits = new HashMap<String, List<Integer>>();
 
@@ -249,7 +280,7 @@ public class Rank {
       return stemmed_body_hits;
   }
 
-  private static String stem_words(String[] words) {
+  public static String stem_words(String[] words) {
     StringBuilder sb = new StringBuilder();
 
     for(int i = 0; i < words.length; i++) {

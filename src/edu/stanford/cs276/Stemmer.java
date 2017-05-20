@@ -16,7 +16,7 @@ import edu.stanford.nlp.ling.Word;
 public class Stemmer/* implements Function<Word,Word> */{
 
   //Turns stemming on and off in LoadHandler.java and Rank.java
-  public static boolean useStemming = false;
+  public static boolean useStemming = true;
 
   private char[] b;
   private int i,     /* offset into b */
